@@ -153,7 +153,3 @@ The application will be available at:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support, email support@attendance-system.com or create an issue in the repository.
