@@ -14,6 +14,7 @@ import {
 	Legend,
 	Filler
 } from 'chart.js';
+import { exportReportsData, exportAttendanceSummary, generateFilename } from '../utils/csvExport';
 
 ChartJS.register(
 	CategoryScale,
@@ -204,9 +205,48 @@ export default function Reports() {
 		}
 	};
 
-	const exportToPDF = () => {
-		// This would implement PDF export functionality
-		alert('PDF export functionality would be implemented here');
+	const handleExportCSV = () => {
+		try {
+			// Export attendance trend data
+			const trendData = reportData.attendanceTrend.map(item => ({
+				date: item.date,
+				present: item.present,
+				absent: item.absent,
+				late: item.late,
+				leave: item.leave,
+				half_day: item.half_day,
+				total: item.total
+			}));
+			
+			const filename = generateFilename('attendance_report');
+			exportReportsData(trendData, filename);
+			
+			console.log('CSV export completed successfully');
+		} catch (error) {
+			console.error('Failed to export CSV:', error);
+		}
+	};
+
+	const handleExportSummaryCSV = () => {
+		try {
+			// Export user attendance summary
+			const summaryData = reportData.userAttendance.map(user => ({
+				userName: user.name,
+				totalDays: user.totalDays,
+				presentDays: user.presentDays,
+				absentDays: user.absentDays,
+				lateDays: user.lateDays,
+				attendancePercentage: user.attendancePercentage,
+				totalWorkHours: user.totalWorkHours
+			}));
+			
+			const filename = generateFilename('attendance_summary');
+			exportAttendanceSummary(summaryData, filename);
+			
+			console.log('Summary CSV export completed successfully');
+		} catch (error) {
+			console.error('Failed to export summary CSV:', error);
+		}
 	};
 
 	if (loading) {
@@ -232,10 +272,18 @@ export default function Reports() {
 					</div>
 					<div className="flex space-x-3">
 						<button
-							onClick={exportToPDF}
-							className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+							onClick={handleExportCSV}
+							className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
 						>
-							📄 Export PDF
+							<span>📊</span>
+							<span>Export CSV</span>
+						</button>
+						<button
+							onClick={handleExportSummaryCSV}
+							className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+						>
+							<span>📈</span>
+							<span>Export Summary</span>
 						</button>
 					</div>
 				</div>

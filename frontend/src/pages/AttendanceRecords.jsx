@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../services/api';
+import { exportAttendanceRecords, formatAttendanceDataForCSV, generateFilename } from '../utils/csvExport';
 
 export default function AttendanceRecords() {
 	const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -144,29 +145,23 @@ export default function AttendanceRecords() {
 		return icons[status] || '❓';
 	};
 
-	const exportToCSV = () => {
-		const headers = ['Date', 'User', 'Team', 'Status', 'Check In', 'Check Out', 'Work Hours', 'Notes'];
-		const csvContent = [
-			headers.join(','),
-			...filteredRecords.map(record => [
-				record.date,
-				record.userName,
-				record.teamName,
-				record.status,
-				record.checkInTime || '',
-				record.checkOutTime || '',
-				record.workHours,
-				record.notes
-			].join(','))
-		].join('\n');
-
-		const blob = new Blob([csvContent], { type: 'text/csv' });
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `attendance_records_${new Date().toISOString().split('T')[0]}.csv`;
-		a.click();
-		window.URL.revokeObjectURL(url);
+	const handleExportCSV = () => {
+		try {
+			// Format data for CSV export
+			const formattedData = formatAttendanceDataForCSV(filteredRecords);
+			
+			// Generate filename with current date and time
+			const filename = generateFilename('attendance_records');
+			
+			// Export to CSV
+			exportAttendanceRecords(formattedData, filename);
+			
+			// Show success message (you could add a toast notification here)
+			console.log('CSV export completed successfully');
+		} catch (error) {
+			console.error('Failed to export CSV:', error);
+			// You could add error handling/notification here
+		}
 	};
 
 	if (loading) {
@@ -191,10 +186,11 @@ export default function AttendanceRecords() {
 						</p>
 					</div>
 					<button
-						onClick={exportToCSV}
-						className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+						onClick={handleExportCSV}
+						className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
 					>
-						📊 Export CSV
+						<span>📊</span>
+						<span>Export CSV</span>
 					</button>
 				</div>
 

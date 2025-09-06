@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import api from '../services/api';
+import { exportUserAttendance, formatAttendanceDataForCSV, generateFilename } from '../utils/csvExport';
 
 export default function MyAttendance() {
 	const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -134,6 +135,24 @@ export default function MyAttendance() {
 	const attendancePercentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
 	const totalWorkHours = filteredRecords.reduce((sum, r) => sum + (r.workHours || 0), 0);
 
+	const handleExportCSV = () => {
+		try {
+			// Format data for CSV export
+			const formattedData = formatAttendanceDataForCSV(filteredRecords);
+			
+			// Generate filename with current date and time
+			const filename = generateFilename('my_attendance');
+			
+			// Export to CSV
+			exportUserAttendance(formattedData, filename);
+			
+			// Show success message
+			console.log('CSV export completed successfully');
+		} catch (error) {
+			console.error('Failed to export CSV:', error);
+		}
+	};
+
 	if (loading) {
 		return (
 			<Layout>
@@ -155,6 +174,13 @@ export default function MyAttendance() {
 							View your personal attendance records and statistics.
 						</p>
 					</div>
+					<button
+						onClick={handleExportCSV}
+						className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+					>
+						<span>📊</span>
+						<span>Export CSV</span>
+					</button>
 				</div>
 
 				{/* Filters */}
